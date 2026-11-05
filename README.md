@@ -59,6 +59,25 @@ If no suitable MAC address is available, generation falls back to a random node 
 Version 1 is intended for compatibility with systems that require its Gregorian timestamp layout.
 For new time-ordered identifiers, version 7 is generally the better choice.
 
+#### UUID version 2
+
+`NewV2` creates a DCE Security UUID by replacing parts of the UUIDv1 layout with a 32-bit local identifier and an 8-bit local domain.
+Use `Person` for a POSIX user ID, `Group` for a POSIX group ID, or `Organisation` for an organisation-defined identifier.
+
+```go
+user := uuid.NewV2(uuid.Person, 1000)
+group := uuid.NewV2(uuid.Group, 1000)
+```
+
+The node identifier is random by default.
+Pass `true` as the final argument to request a MAC address, with a random node identifier used as a fallback.
+An unsupported `LocalDomain` value returns the Nil UUID.
+
+UUIDv2 replaces the low 32 timestamp bits and the low 8 clock-sequence bits used by UUIDv1.
+Its timestamp therefore has a resolution of approximately seven minutes, and only 6 clock-sequence bits remain.
+At most 64 distinct clock-sequence values are available for the same node, local domain, local ID, and timestamp interval.
+Embedding a UID, GID, or MAC address can also expose host identity information, so UUIDv2 should be used only for DCE compatibility.
+
 #### UUID version 3
 
 `NewV3` creates a deterministic, name-based UUID by hashing a namespace UUID followed by a name with MD5.

@@ -59,6 +59,25 @@ u := uuid.NewV1(true)
 version 1 は、Gregorian timestamp 形式を必要とするシステムとの互換性を目的としています。
 新しい時系列 UUID には、通常 version 7 のほうが適しています。
 
+#### UUID バージョン 2
+
+`NewV2` は UUIDv1 の一部を 32 bit の local ID と 8 bit の local domain で置き換え、DCE Security UUID を生成します。
+POSIX user ID には `Person`、POSIX group ID には `Group`、組織独自の ID には `Organisation` を指定します。
+
+```go
+user := uuid.NewV2(uuid.Person, 1000)
+group := uuid.NewV2(uuid.Group, 1000)
+```
+
+Node ID は既定でランダムです。
+最後の引数に `true` を渡すと MAC アドレスを使い、取得できない場合はランダムな Node ID へフォールバックします。
+未対応の `LocalDomain` 値を渡すと Nil UUID を返します。
+
+UUIDv2 は、UUIDv1 の timestamp 下位 32 bit と clock sequence 下位 8 bit を置き換えます。
+そのため timestamp の分解能は約 7 分となり、clock sequence は 6 bit しか残りません。
+同じ Node ID、local domain、local ID、timestamp 区間で利用できる clock sequence は最大 64 通りです。
+UID、GID、MAC アドレスを埋め込むとホストの識別情報が露出する可能性もあるため、UUIDv2 は DCE 互換性が必要な場合に限って使用してください。
+
 #### UUID バージョン 3
 
 `NewV3` は、namespace UUID と name を連結した値を MD5 でハッシュし、決定的な名前ベース UUID を生成します。
