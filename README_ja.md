@@ -2,6 +2,8 @@
 
 [English](./README.md) | [日本語](./README_ja.md)
 
+[v0.0.1 から v1.0.0 への移行](./MIGRATION_ja.md)
+
 `github.com/WhiteRaven777/uuid` は、Go 1.27 の標準ライブラリに含まれる [`uuid`](https://pkg.go.dev/uuid) パッケージを拡張する小さなパッケージです。
 
 ## 標準ライブラリのラッパー
