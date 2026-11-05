@@ -76,6 +76,19 @@ Callers are responsible for converting names to the canonical representation req
 An unsupported `Namespace` value returns the Nil UUID.
 Because UUIDv3 uses MD5, it is intended for compatibility rather than security-sensitive applications.
 
+#### UUID version 5
+
+`NewV5` creates a deterministic, name-based UUID in the same way as `NewV3`, but uses SHA-1 instead of MD5.
+It accepts the same `DNS`, `URL`, `OID`, and `X500` namespace constants.
+
+```go
+u := uuid.NewV5(uuid.DNS, []byte("www.example.com"))
+```
+
+SHA-1 produces 160 bits, of which `NewV5` uses the first 128 bits before setting the version and variant fields.
+As with `NewV3`, callers are responsible for canonicalising names, and an unsupported `Namespace` value returns the Nil UUID.
+UUIDv5 is generally preferable to UUIDv3 for deterministic name-based identifiers, but SHA-1 should not be used for security-sensitive hashing.
+
 #### UUID version 6
 
 `NewV6` uses the same Gregorian timestamp, clock sequence, and node identifier as UUIDv1, but stores the timestamp from most to least significant.

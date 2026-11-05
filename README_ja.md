@@ -76,6 +76,19 @@ u := uuid.NewV3(uuid.DNS, []byte("www.example.com"))
 未対応の `Namespace` 値を渡すと Nil UUID を返します。
 UUIDv3 は MD5 を使用するため、セキュリティ用途ではなく互換性維持を目的としています。
 
+#### UUID バージョン 5
+
+`NewV5` は `NewV3` と同じ方法で決定的な名前ベース UUID を生成しますが、MD5 の代わりに SHA-1 を使用します。
+namespace には、同じ `DNS`、`URL`、`OID`、`X500` 定数を指定できます。
+
+```go
+u := uuid.NewV5(uuid.DNS, []byte("www.example.com"))
+```
+
+SHA-1 が生成する 160 bit のうち、`NewV5` は先頭 128 bit を使用してから version と variant のフィールドを設定します。
+`NewV3` と同様、name の正規化は呼び出し側で行い、未対応の `Namespace` 値を渡すと Nil UUID を返します。
+決定的な名前ベース UUID には通常 UUIDv3 より UUIDv5 が適していますが、SHA-1 をセキュリティ用途のハッシュとして使うべきではありません。
+
 #### UUID バージョン 6
 
 `NewV6` は UUIDv1 と同じ Gregorian timestamp、clock sequence、Node ID を使用し、timestamp を最上位側から順番に格納します。
