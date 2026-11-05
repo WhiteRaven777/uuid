@@ -59,6 +59,23 @@ If no suitable MAC address is available, generation falls back to a random node 
 Version 1 is intended for compatibility with systems that require its Gregorian timestamp layout.
 For new time-ordered identifiers, version 7 is generally the better choice.
 
+#### UUID version 3
+
+`NewV3` creates a deterministic, name-based UUID by hashing a namespace UUID followed by a name with MD5.
+The same namespace and name produce the same UUID, while the namespace keeps identical names in different naming systems separate.
+
+RFC 9562 defines namespace UUIDs for DNS names, URLs, OIDs, and X.500 Distinguished Names.
+Select one with the `DNS`, `URL`, `OID`, or `X500` constant.
+
+```go
+u := uuid.NewV3(uuid.DNS, []byte("www.example.com"))
+```
+
+`NewV3` accepts any byte sequence and does not canonicalise it.
+Callers are responsible for converting names to the canonical representation required by their namespace.
+An unsupported `Namespace` value returns the Nil UUID.
+Because UUIDv3 uses MD5, it is intended for compatibility rather than security-sensitive applications.
+
 #### UUID version 6
 
 `NewV6` uses the same Gregorian timestamp, clock sequence, and node identifier as UUIDv1, but stores the timestamp from most to least significant.

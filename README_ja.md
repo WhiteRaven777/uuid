@@ -59,6 +59,23 @@ u := uuid.NewV1(true)
 version 1 は、Gregorian timestamp 形式を必要とするシステムとの互換性を目的としています。
 新しい時系列 UUID には、通常 version 7 のほうが適しています。
 
+#### UUID バージョン 3
+
+`NewV3` は、namespace UUID と name を連結した値を MD5 でハッシュし、決定的な名前ベース UUID を生成します。
+同じ namespace と name からは同じ UUID が生成され、namespace が異なれば同じ name でも別の UUID になります。
+
+RFC 9562 では、DNS name、URL、OID、X.500 Distinguished Name の namespace UUID が定義されています。
+`DNS`、`URL`、`OID`、`X500` のいずれかの定数を選択します。
+
+```go
+u := uuid.NewV3(uuid.DNS, []byte("www.example.com"))
+```
+
+`NewV3` は任意のバイト列を受け取り、正規化は行いません。
+呼び出し側で、namespace に応じた正規のバイト表現へ name を変換する必要があります。
+未対応の `Namespace` 値を渡すと Nil UUID を返します。
+UUIDv3 は MD5 を使用するため、セキュリティ用途ではなく互換性維持を目的としています。
+
 #### UUID バージョン 6
 
 `NewV6` は UUIDv1 と同じ Gregorian timestamp、clock sequence、Node ID を使用し、timestamp を最上位側から順番に格納します。

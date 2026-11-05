@@ -54,6 +54,17 @@ func TestUnmarshalText(t *testing.T) {
 	}
 }
 
+func TestUnmarshalTextError(t *testing.T) {
+	want := uuid.MustParse("f81d4fae-7dec-11d0-a765-00a0c91e6bf6")
+	got := want
+	if err := got.UnmarshalText([]byte("not-a-uuid")); err == nil {
+		t.Fatal("UnmarshalText() returned nil, want error")
+	}
+	if got != want {
+		t.Errorf("UnmarshalText() changed UUID to %v on error, want %v", got, want)
+	}
+}
+
 func TestParseSuccess(t *testing.T) {
 	want := uuid.UUID{0xf8, 0x1d, 0x4f, 0xae, 0x7d, 0xec, 0x11, 0xd0, 0xa7, 0x65, 0x00, 0xa0, 0xc9, 0x1e, 0x6b, 0xf6}
 	for _, input := range []string{

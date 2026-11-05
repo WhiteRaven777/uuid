@@ -44,13 +44,13 @@ func (u UUID) AppendText(b []byte) ([]byte, error) {
 }
 
 // UnmarshalText wraps [uuid.UUID.UnmarshalText].
-func (u *UUID) UnmarshalText(b []byte) error {
+func (u *UUID) UnmarshalText(b []byte) (err error) {
 	var standard stduuid.UUID
-	if err := standard.UnmarshalText(b); err != nil {
-		return err
+	if err = standard.UnmarshalText(b); err != nil {
+		return
 	}
 	*u = UUID(standard)
-	return nil
+	return
 }
 
 // Compare wraps [uuid.UUID.Compare].

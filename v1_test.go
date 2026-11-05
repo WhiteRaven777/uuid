@@ -36,6 +36,16 @@ func TestNewV1(t *testing.T) {
 	}
 }
 
+func TestNewV1WithMAC(t *testing.T) {
+	u := NewV1(true)
+	if got := u[6] >> 4; got != 1 {
+		t.Errorf("version = %d, want 1", got)
+	}
+	if got := u[8] >> 6; got != 0b10 {
+		t.Errorf("variant = %02b, want 10", got)
+	}
+}
+
 func TestV1ClockRollback(t *testing.T) {
 	g := gregorianGenerator{
 		initialised:   true,

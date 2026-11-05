@@ -23,6 +23,16 @@ func TestNewV6(t *testing.T) {
 	}
 }
 
+func TestNewV6WithMAC(t *testing.T) {
+	u := NewV6(true)
+	if got := u[6] >> 4; got != 6 {
+		t.Errorf("version = %d, want 6", got)
+	}
+	if got := u[8] >> 6; got != 0b10 {
+		t.Errorf("variant = %02b, want 10", got)
+	}
+}
+
 func TestNewV6SortOrder(t *testing.T) {
 	previous := NewV6()
 	for range 10_000 {
