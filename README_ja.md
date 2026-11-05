@@ -2,26 +2,24 @@
 
 [English](./README.md) | [日本語](./README_ja.md)
 
-`github.com/WhiteRaven777/uuid` は、Go 1.27の標準ライブラリに含まれる
-[`uuid`](https://pkg.go.dev/uuid) パッケージを拡張する小さなパッケージです。
+`github.com/WhiteRaven777/uuid` は、Go 1.27 の標準ライブラリに含まれる [`uuid`](https://pkg.go.dev/uuid) パッケージを拡張する小さなパッケージです。
 
-## 標準ライブラリのwrapper
+## 標準ライブラリのラッパー
 
-標準APIを薄いwrapperとして公開しています。
+標準 API を薄いラッパーとして公開しています。
 
 - `Parse`、`MustParse`、`New`、`Nil`、`Max`、`NewV4`、`NewV7`
 - `UUID.String`、`MarshalText`、`AppendText`、`UnmarshalText`、`Compare`
 
-このパッケージの `UUID` 型は、標準ライブラリの型と同じ `[16]byte` 表現を
-持ちます。UUIDの解析、version 4の生成、version 7の生成は標準ライブラリへ
-委譲しています。
+このパッケージの `UUID` 型は、標準ライブラリの型と同じ `[16]byte` 表現を持ちます。
+UUID の解析、version 4 の生成、version 7 の生成は標準ライブラリへ委譲しています。
 
 ## 独自拡張
 
 ### 追加の出力形式
 
-このパッケージの `UUID` 型には、標準ライブラリの型にはない3つの出力
-メソッドがあります。次のUUIDを例にすると、
+このパッケージの `UUID` 型には、標準ライブラリの型にはない 3 つの出力メソッドがあります。
+次の UUID を例にします。
 
 ```text
 01234567-89ab-7def-8123-456789abcdef
@@ -31,60 +29,56 @@
 
 | メソッド | 形式 | 出力 |
 | --- | --- | --- |
-| `Short()` | ハイフンを含まない32桁の小文字16進数 | `0123456789ab7def8123456789abcdef` |
+| `Short()` | ハイフンを含まない 32 桁の小文字 16 進数 | `0123456789ab7def8123456789abcdef` |
 | `URN()` | UUID URN | `urn:uuid:01234567-89ab-7def-8123-456789abcdef` |
-| `Base64()` | パディングを含まない標準Base64 | `ASNFZ4mrfe+BI0VniavN7w` |
+| `Base64()` | パディングを含まない標準 Base64 | `ASNFZ4mrfe+BI0VniavN7w` |
 
-`Short` と `URN` の戻り値は `Parse` へ渡せます。Base64は出力専用形式であり、
-`Parse` では解析できません。
+`Short` と `URN` の戻り値は `Parse` へ渡せます。
+Base64 は出力専用形式であり、`Parse` では解析できません。
 
-### 追加のUUID version
+### 追加の UUID バージョン
 
-#### UUID version 1
+#### UUID バージョン 1
 
-`NewV1` は、標準ライブラリが提供するversion 4およびversion 7の生成機能を
-補完します。UUIDv1は、60bitのGregorian timestamp、14bitのclock sequence、
-48bitのNode IDで構成されます。
+`NewV1` は、標準ライブラリが提供する version 4 および version 7 の生成機能を補完します。
+UUIDv1 は、60 bit の Gregorian timestamp、14 bit の clock sequence、48 bit の Node ID で構成されます。
 
-`NewV1` は既定で、ハードウェアのMACアドレスを公開しないよう、暗号学的に
-安全な乱数から生成したNode IDを使用します。
+`NewV1` は既定で、ハードウェアの MAC アドレスを公開しないよう、暗号学的に安全な乱数から生成した Node ID を使用します。
 
 ```go
 u := uuid.NewV1()
 ```
 
-Node IDとしてMACアドレスの使用を要求する場合は、`true` を渡します。
+Node ID に MAC アドレスを使う場合は、`true` を渡します。
 
 ```go
 u := uuid.NewV1(true)
 ```
 
-適切なMACアドレスを取得できない場合は、ランダムなNode IDへフォールバック
-します。version 1は、Gregorian timestamp形式を必要とするシステムとの互換性を
-目的としています。新しい時系列UUIDには、通常version 7のほうが適しています。
+適切な MAC アドレスを取得できない場合は、ランダムな Node ID へフォールバックします。
+version 1 は、Gregorian timestamp 形式を必要とするシステムとの互換性を目的としています。
+新しい時系列 UUID には、通常 version 7 のほうが適しています。
 
-#### UUID version 6
+#### UUID バージョン 6
 
-`NewV6` はUUIDv1と同じGregorian timestamp、clock sequence、Node IDを使用し、
-timestampを最上位側から順番に格納します。これにより、UUIDが生成順に並び、
-データベースインデックスの局所性が改善します。
+`NewV6` は UUIDv1 と同じ Gregorian timestamp、clock sequence、Node ID を使用し、timestamp を最上位側から順番に格納します。
+これにより、UUID が生成順に並び、データベースインデックスの局所性が改善します。
 
-`NewV1` と同様、Node IDは既定でランダムです。MACアドレスの使用を要求する
-場合は `true` を渡します。取得できない場合はランダムなNode IDへフォール
-バックします。
+`NewV1` と同様、Node ID は既定でランダムです。
+MAC アドレスを使う場合は `true` を渡します。
+取得できない場合はランダムな Node ID へフォールバックします。
 
 ```go
 ordered := uuid.NewV6()
 hardwareBased := uuid.NewV6(true)
 ```
 
-UUIDv6は、UUIDv1互換のフィールドと優れたソート特性を必要とするシステムに
-適しています。UUIDv1との互換性を必要としない新しいシステムでは、通常
-UUIDv7を使用すべきです。
+UUIDv6 は、UUIDv1 互換のフィールドと生成時刻順のソートを必要とするシステムに適しています。
+UUIDv1 との互換性を必要としない新しいシステムには、通常 UUIDv7 が適しています。
 
 ## 動作要件
 
-Go 1.27以降が必要です。
+Go 1.27 以降が必要です。
 
 ## 使用例
 
