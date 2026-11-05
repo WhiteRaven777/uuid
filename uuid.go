@@ -1,5 +1,5 @@
-// Package uuid extends the Go standard library's uuid package with a few
-// additional encodings.
+// Package uuid extends the Go standard library's uuid package with additional
+// UUID versions and utilities.
 package uuid
 
 import stduuid "uuid"
