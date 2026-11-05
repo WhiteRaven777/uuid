@@ -1,3 +1,3 @@
 module github.com/WhiteRaven777/uuid
 
-go 1.16
+go 1.27
