@@ -63,6 +63,25 @@ u := uuid.NewV1(true)
 します。version 1は、Gregorian timestamp形式を必要とするシステムとの互換性を
 目的としています。新しい時系列UUIDには、通常version 7のほうが適しています。
 
+#### UUID version 6
+
+`NewV6` はUUIDv1と同じGregorian timestamp、clock sequence、Node IDを使用し、
+timestampを最上位側から順番に格納します。これにより、UUIDが生成順に並び、
+データベースインデックスの局所性が改善します。
+
+`NewV1` と同様、Node IDは既定でランダムです。MACアドレスの使用を要求する
+場合は `true` を渡します。取得できない場合はランダムなNode IDへフォール
+バックします。
+
+```go
+ordered := uuid.NewV6()
+hardwareBased := uuid.NewV6(true)
+```
+
+UUIDv6は、UUIDv1互換のフィールドと優れたソート特性を必要とするシステムに
+適しています。UUIDv1との互換性を必要としない新しいシステムでは、通常
+UUIDv7を使用すべきです。
+
 ## 動作要件
 
 Go 1.27以降が必要です。

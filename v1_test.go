@@ -37,17 +37,19 @@ func TestNewV1(t *testing.T) {
 }
 
 func TestV1ClockRollback(t *testing.T) {
-	g := v1Generator{
+	g := gregorianGenerator{
 		initialised:   true,
 		node:          [6]byte{1, 2, 3, 4, 5, 6},
 		clockSequence: 7,
 	}
 	now := time.Date(2026, time.January, 2, 3, 4, 5, 0, time.UTC)
-	first := g.new(now, nil)
-	second := g.new(now.Add(-time.Second), nil)
+	firstTimestamp, firstSequence, firstNode := g.next(now, nil)
+	secondTimestamp, secondSequence, secondNode := g.next(now.Add(-time.Second), nil)
+	first := formatV1(firstTimestamp, firstSequence, firstNode)
+	second := formatV1(secondTimestamp, secondSequence, secondNode)
 
-	firstSequence := binary.BigEndian.Uint16(first[8:10]) & 0x3fff
-	secondSequence := binary.BigEndian.Uint16(second[8:10]) & 0x3fff
+	firstSequence = binary.BigEndian.Uint16(first[8:10]) & 0x3fff
+	secondSequence = binary.BigEndian.Uint16(second[8:10]) & 0x3fff
 	if got, want := secondSequence, (firstSequence+1)&0x3fff; got != want {
 		t.Errorf("clock sequence after rollback = %d, want %d", got, want)
 	}
@@ -58,20 +60,22 @@ func TestV1ClockRollback(t *testing.T) {
 
 func TestV1MACNode(t *testing.T) {
 	want := [6]byte{0x02, 0x11, 0x22, 0x33, 0x44, 0x55}
-	g := v1Generator{}
-	u := g.new(time.Now(), func() ([6]byte, bool) {
+	g := gregorianGenerator{}
+	timestamp, clockSequence, node := g.next(time.Now(), func() ([6]byte, bool) {
 		return want, true
 	})
+	u := formatV1(timestamp, clockSequence, node)
 	if got := [6]byte(u[10:]); got != want {
 		t.Fatalf("node = %x, want %x", got, want)
 	}
 }
 
 func TestV1MACNodeFallback(t *testing.T) {
-	g := v1Generator{}
-	u := g.new(time.Now(), func() ([6]byte, bool) {
+	g := gregorianGenerator{}
+	timestamp, clockSequence, node := g.next(time.Now(), func() ([6]byte, bool) {
 		return [6]byte{}, false
 	})
+	u := formatV1(timestamp, clockSequence, node)
 	if got := u[10] & 0x01; got != 1 {
 		t.Fatalf("fallback node multicast bit = %d, want 1", got)
 	}

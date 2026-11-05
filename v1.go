@@ -11,13 +11,13 @@ import (
 const gregorianEpochOffset = uint64(122192928000000000)
 
 var (
-	randomV1Generator v1Generator
-	macV1Generator    v1Generator
+	randomV1Generator gregorianGenerator
+	macV1Generator    gregorianGenerator
 )
 
-type v1NodeSource func() (node [6]byte, ok bool)
+type nodeSource func() (node [6]byte, ok bool)
 
-type v1Generator struct {
+type gregorianGenerator struct {
 	mu sync.Mutex
 
 	initialised   bool
@@ -34,18 +34,23 @@ type v1Generator struct {
 // from a network interface when one is available and otherwise falls back to a
 // randomly generated node identifier.
 func NewV1(useMAC ...bool) UUID {
+	var timestamp uint64
+	var clockSequence uint16
+	var node [6]byte
 	if len(useMAC) > 0 && useMAC[0] {
-		return macV1Generator.new(time.Now(), hardwareNode)
+		timestamp, clockSequence, node = macV1Generator.next(time.Now(), hardwareNode)
+	} else {
+		timestamp, clockSequence, node = randomV1Generator.next(time.Now(), nil)
 	}
-	return randomV1Generator.new(time.Now(), nil)
+	return formatV1(timestamp, clockSequence, node)
 }
 
-func (g *v1Generator) new(now time.Time, nodeSource v1NodeSource) UUID {
+func (g *gregorianGenerator) next(now time.Time, source nodeSource) (timestamp uint64, clockSequence uint16, node [6]byte) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
 	if !g.initialised {
-		g.initialise(nodeSource)
+		g.initialise(source)
 	}
 
 	wall := gregorianTimestamp(now)
@@ -53,19 +58,19 @@ func (g *v1Generator) new(now time.Time, nodeSource v1NodeSource) UUID {
 		g.clockSequence = (g.clockSequence + 1) & 0x3fff
 	}
 
-	timestamp := wall
+	timestamp = wall
 	if timestamp <= g.lastTimestamp {
 		timestamp = g.lastTimestamp + 1
 	}
 
 	g.lastWall = wall
 	g.lastTimestamp = timestamp
-	return formatV1(timestamp, g.clockSequence, g.node)
+	return timestamp, g.clockSequence, g.node
 }
 
-func (g *v1Generator) initialise(nodeSource v1NodeSource) {
-	if nodeSource != nil {
-		if node, ok := nodeSource(); ok {
+func (g *gregorianGenerator) initialise(source nodeSource) {
+	if source != nil {
+		if node, ok := source(); ok {
 			g.node = node
 			g.initialiseClockSequence()
 			g.initialised = true
@@ -83,7 +88,7 @@ func (g *v1Generator) initialise(nodeSource v1NodeSource) {
 	g.initialised = true
 }
 
-func (g *v1Generator) initialiseClockSequence() {
+func (g *gregorianGenerator) initialiseClockSequence() {
 	var seed [2]byte
 	rand.Read(seed[:])
 	g.clockSequence = binary.BigEndian.Uint16(seed[:]) & 0x3fff

@@ -64,6 +64,24 @@ node identifier. Version 1 is intended for compatibility with systems that
 require its Gregorian timestamp layout. For new time-ordered identifiers,
 version 7 is generally the better choice.
 
+#### UUID version 6
+
+`NewV6` uses the same Gregorian timestamp, clock sequence, and node identifier
+as UUIDv1, but stores the timestamp from most to least significant. This makes
+the UUIDs sort in generation order and improves locality in database indexes.
+
+As with `NewV1`, the node identifier is random by default. Pass `true` to
+request a MAC address, with a random node identifier used as a fallback:
+
+```go
+ordered := uuid.NewV6()
+hardwareBased := uuid.NewV6(true)
+```
+
+UUIDv6 is primarily useful for systems that need UUIDv1-compatible fields with
+better sorting behaviour. New systems that do not require UUIDv1 compatibility
+should generally use UUIDv7.
+
 ## Requirements
 
 Go 1.27 or newer is required.
